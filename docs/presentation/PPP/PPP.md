@@ -18,12 +18,12 @@ paginate: true
 
 ---
 
-# What I Aim to Do to Solve This
+# Proposed Solution
 
 ## Proposed Solution
 
-- Understand the limitations of LoRa in multiple different network settings.
-- Create a highly distributed system of LoRa transmitters and Receivers
+- Understand the **limitations** of **LoRa** in **multiple** different **network settings**.
+- Create a **highly distributed** system of **LoRa transmitters** and **Receivers**
 
 ---
 
@@ -32,8 +32,8 @@ paginate: true
 ## System Overview
 
 **Key Components:**
-- ESP32 Micro Controller: Brains and main component running software 
-- LoRa Tx/Rx: Transmission and reception devices
+- **ESP32 Micro Controller**: **Brains** and main component running software 
+- **LoRa Tx/Rx**: Transmission and reception devices
 
 ---
 
@@ -41,36 +41,29 @@ paginate: true
 # Sprint Structure - Sprint 1
 
 ## Goals
-- Simple LoRa P2P network
-- Understand LoRa 
+- Simple **LoRa P2P network**
+- Understand LoRa's **Spreading Factor** and **Bandwidth**
   
 ## Tasks
-1. Understand how to make a simple LoRa network with complete payload reception and transmission
-2. Push it to it's limits - understand the limitations of the devices (Bandwidth, range)
-3. Create evaluation matrix for combinations of Spreading factor and bandwidth. 
+1. Understand how to make a **simple LoRa network** with **complete payload reception** and **transmission**
+2. Push it to it's limits - **understand** the **limitations** of the devices (Bandwidth, range)
+3. Create **evaluation matrix** for **combinations** of **Spreading factor and bandwidth**. 
 
-## Deliverables
-- P2P network
-- Spreading Factor and Bandwidth evaluation (For P2P)
 
 ---
 
 # Sprint Structure - Sprint 2
 
 ## Goals
-- LoRa Mesh network creation
-- Parelleization of Transmission and reception
+- LoRa **Mesh network** creation
+- **Parelleization** of **Transmission and reception**
 
 ## Tasks
-1. Create a more complex network of LoRa devices
-2. Understand LoRa mesh limitations. 
-3. Spreading Factor and Bandwidth evaluation (For Mesh)
-4. Distribute transmission and reception to begin parallelization of Tx and Rx
+1. Create a more **complex network** of **LoRa devices**
+2. Understand **LoRa mesh limitations**. 
+3. **Spreading Factor** and **Bandwidth evaluation** (For Mesh)
+4. **Distribute** **transmission** and **reception** to begin parallelization of Tx and Rx
     
-
-## Deliverables
-- Distributed LoRa mesh network
-- Spreading Factor and Bandwidth evaluation
 
 ---
 
@@ -78,7 +71,7 @@ paginate: true
 
 ## AI Integration
 
-1. 
+1. **Serialization** and **Parallelization** in **wired connections**.
 2. Learning C/C++ with AI for **effective** programming of micro-controllers 
 
 ---
