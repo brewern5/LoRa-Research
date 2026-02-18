@@ -67,8 +67,7 @@ size: 16:9
 - Create testing simulation 
   - Add SD card reader for local logging
   - Add GPS/GNSS module for accurate positioning
-- Begin 
-
+- Begin Testing
 
 
 ---
