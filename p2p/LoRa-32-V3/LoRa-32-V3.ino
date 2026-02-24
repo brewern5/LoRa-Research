@@ -7,12 +7,13 @@
 SdManager sdMgr;
 AudioPacket packet;
 
-// LoRa
 LoRaManager lora;
 
 // Session
 uint16_t g_session_id;
 uint16_t g_seq_num;
+uint32_t timeout_ms = 2000;
+
 // ──────────────────────────────────────────────
 //  Demo audio data (replace with real source)
 // ──────────────────────────────────────────────
@@ -30,8 +31,8 @@ void setup() {
 
   // Generate a simple session ID from millis() — replace with something
   // more robust (e.g. random32, incrementing NVS counter) in production
-  uint16_t g_session_id = (uint16_t)(millis() & 0xFFFF);
-  uint16_t g_seq_num = 0;
+  g_session_id = (uint16_t)(millis() & 0xFFFF);
+  g_seq_num = 0;
 
   lora.init(&g_session_id, &g_seq_num);
 
@@ -52,19 +53,19 @@ void loop() {
                 DEMO_AUDIO_LEN, total_frags, audio_crc);
 
   // ── 1. Send AUDIO_START ──────────────────────
-  if (!sendAudioStart(total_frags, 0x00 /*raw PCM*/, 8000, 64, DEMO_AUDIO_LEN)) {
+  if (!lora.sendAudioStart(total_frags, 0x00 /*raw PCM*/, 8000, 64, DEMO_AUDIO_LEN)) {
     Serial.println("START failed — retrying in 5s");
     delay(5000);
     return;
   }
   // Optional: wait for ACK on START
-  waitForAck(g_seq_num - 1);
+  lora.waitForAck(lora.getLastSeqNum(), timeout_ms);
 
   // ── 2. Send DATA fragments ───────────────────
   size_t offset = 0;
   for (uint16_t frag = 0; frag < total_frags; frag++) {
     size_t chunk = min((size_t)LORA_MAX_DATA_PAYLOAD, DEMO_AUDIO_LEN - offset);
-    if (!sendAudioData(DEMO_AUDIO + offset, (uint8_t)chunk)) {
+    if (!lora.sendAudioData(DEMO_AUDIO + offset, (uint8_t)chunk)) {
       Serial.printf("DATA frag %u failed\n", frag);
       // In production: implement retransmit or NACK handling here
     }
@@ -73,8 +74,8 @@ void loop() {
   }
 
   // ── 3. Send AUDIO_END ────────────────────────
-  sendAudioEnd(total_frags, audio_crc);
-  waitForAck(g_seq_num - 1);
+  lora.sendAudioEnd(total_frags, audio_crc);
+  lora.waitForAck(lora.getLastSeqNum(), timeout_ms);
 
   // ── Bump session for next run ────────────────
   g_session_id++;

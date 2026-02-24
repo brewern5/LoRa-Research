@@ -1,7 +1,7 @@
 #pragma once
 #include <RadioLib.h>
-#include "src/storage/SdManager.h"
-#include "src/models/packet.h"
+#include "../storage/SdManager.h"
+#include "../models/packet.h"
 
 // Heltec ESP32 LoRa V3 SX1262 pin mapping
 #define LORA_NSS 8
@@ -30,21 +30,12 @@ class LoRaManager {
                     uint32_t total_size);
         bool sendAudioData(const uint8_t* data, uint8_t len);
         bool sendAudioEnd(uint16_t frag_count, uint32_t full_crc32);
-        bool waitForAck(uint16_t expected_seq, uint32_t timeout_ms = 2000);
-        
-        // Helpers
-        int sendPacket(const LoRaAudioPacket* pkt, size_t payload_len);
-        void fillHeader(LoRaAudioPacket* pkt, uint8_t type);
-        bool sendAudioStart(uint16_t total_frags, uint8_t codec,
-                    uint16_t sample_hz, uint16_t duration_ms,
-                    uint32_t total_size);
-        bool sendAudioData(const uint8_t* data, uint8_t len);
-        bool sendAudioEnd(uint16_t frag_count, uint32_t full_crc32);
-        bool waitForAck(uint16_t expected_seq, uint32_t timeout_ms = 2000);
+        bool waitForAck(uint16_t expected_seq, uint32_t timeout_ms);
 
         // Expose for logging after ACK
         float getLastRSSI() { return _radio.getRSSI(); }
         float getLastSNR() { return _radio.getSNR(); }
+        uint16_t getLastSeqNum() { return _seq_num - 1; } // Return the last sent seq num
     private:
       // Radio obj
       SX1262 _radio = new Module(LORA_NSS, LORA_DIO1, LORA_NRST, LORA_BUSY);

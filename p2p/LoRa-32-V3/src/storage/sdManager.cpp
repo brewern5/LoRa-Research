@@ -1,4 +1,4 @@
-#include "sdManager.h"
+#include "SdManager.h"
 
 bool SdManager::init() {
   if (!_sd.begin(SD_CS, SD_SCK_MHZ(20))) {

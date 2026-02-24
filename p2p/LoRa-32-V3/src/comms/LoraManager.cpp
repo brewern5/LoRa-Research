@@ -21,20 +21,6 @@ bool LoRaManager::init(uint16_t *g_session_id, uint16_t *g_seq_num) {
   return true;
 }
 
-void LoRaManager::_fillHeader(LoRaAudioPacket* pkt, uint8_t type) {
-  buildHeader(
-    &pkt->header,
-    type,
-    MY_NODE_ID,
-    PEER_NODE_ID,
-    EXPERIMENT_ID,
-    _session_id,
-    _seq_num++,
-    TX_POWER_DBM,
-    TX_SF,
-    TX_CR
-  );
-}
 /*
   #     Helpers
 */
@@ -48,7 +34,7 @@ void LoRaManager::_fillHeader(LoRaAudioPacket* pkt, uint8_t type) {
  * @param payload_len Number of payload bytes to include after the header
  * @return RADIOLIB_ERR_NONE on success
  */
-int LoRaManager::sendPacket(const LoRaAudioPacket* pkt, size_t payload_len) {
+int LoRaManager::_sendPacket(const LoRaAudioPacket* pkt, size_t payload_len) {
   // Total wire bytes = fixed header + actual payload length
   size_t total_len = LORA_HEADER_SIZE + payload_len;
 
@@ -61,7 +47,7 @@ int LoRaManager::sendPacket(const LoRaAudioPacket* pkt, size_t payload_len) {
   return _radio.transmit(reinterpret_cast<const uint8_t*>(pkt), total_len);
 }
 
-void LoRaManager::fillHeader(LoRaAudioPacket* pkt, uint8_t type) {
+void LoRaManager::_fillHeader(LoRaAudioPacket* pkt, uint8_t type) {
   buildHeader(
     &pkt->header,
     type,
@@ -90,7 +76,7 @@ bool LoRaManager::sendAudioStart(uint16_t total_frags, uint8_t codec,
                     uint32_t total_size) {
   LoRaAudioPacket pkt;
   memset(&pkt, 0, sizeof(pkt));
-  fillHeader(&pkt, PKT_AUDIO_START);
+  _fillHeader(&pkt, PKT_AUDIO_START);
 
   AudioStartPayload& sp = pkt.payload.start;
   sp.total_frags = total_frags;
@@ -102,7 +88,7 @@ bool LoRaManager::sendAudioStart(uint16_t total_frags, uint8_t codec,
   sp.crc16 = crc16(reinterpret_cast<const uint8_t*>(&sp),
                    sizeof(AudioStartPayload) - sizeof(uint16_t));
 
-  int state = sendPacket(&pkt, sizeof(AudioStartPayload));
+  int state = _sendPacket(&pkt, sizeof(AudioStartPayload));
   if (state == RADIOLIB_ERR_NONE) {
     Serial.println("[TX] AUDIO_START sent");
   } else {
@@ -126,7 +112,7 @@ bool LoRaManager::sendAudioData(const uint8_t* data, uint8_t len) {
 
   LoRaAudioPacket pkt;
   memset(&pkt, 0, sizeof(pkt));
-  fillHeader(&pkt, PKT_AUDIO_DATA);
+  _fillHeader(&pkt, PKT_AUDIO_DATA);
 
   AudioDataPayload& dp = pkt.payload.data;
   memcpy(dp.data, data, len);
@@ -158,14 +144,14 @@ bool LoRaManager::sendAudioData(const uint8_t* data, uint8_t len) {
 bool LoRaManager::sendAudioEnd(uint16_t frag_count, uint32_t full_crc32) {
   LoRaAudioPacket pkt;
   memset(&pkt, 0, sizeof(pkt));
-  fillHeader(&pkt, PKT_AUDIO_END);
+  _fillHeader(&pkt, PKT_AUDIO_END);
 
   AudioEndPayload& ep = pkt.payload.end;
   ep.frag_count = frag_count;
   ep.crc32      = full_crc32;
   ep.reserved   = 0;
 
-  int state = sendPacket(&pkt, sizeof(AudioEndPayload));
+  int state = _sendPacket(&pkt, sizeof(AudioEndPayload));
   if (state == RADIOLIB_ERR_NONE) {
     Serial.println("[TX] AUDIO_END sent");
   } else {
@@ -182,7 +168,7 @@ bool LoRaManager::sendAudioEnd(uint16_t frag_count, uint32_t full_crc32) {
  * @param expected_seq  The sequence number we expect to be ACK'd
  * @param timeout_ms    How long to wait in milliseconds
  */
-bool LoRaManager::waitForAck(uint16_t expected_seq, uint32_t timeout_ms = 2000) {
+bool LoRaManager::waitForAck(uint16_t expected_seq, uint32_t timeout_ms) {
   uint8_t buf[LORA_MAX_PAYLOAD];
   int state = _radio.receive(buf, sizeof(buf));
 
