@@ -36,7 +36,6 @@ size: 16:9
 
 # Encountered Challenges
 - Combination of incompatble 915MHz devices with 433MHz devices
-- 
 
 --- 
 
@@ -44,7 +43,7 @@ size: 16:9
 
  - **Being Direct and explicit matters**
    - Don't query *"Tell me about LoRa FCC regulations"*
-     - Too narrow 
+     - Too broad - it assumes only the 915MHz device
  - ***With* who you chat with and *what* you query is**
    - As Cho said, the AI matters
    - ***ChatGPT*** 
@@ -57,10 +56,10 @@ size: 16:9
 # Learning with AI pt. 2
 
 ## Serialization
-    - 
+    - Data converted to byte sequences
 
 ## Parallelization
-
+    - Data sent as multiple bits through multiple lines
 ---
 
 # Next steps
