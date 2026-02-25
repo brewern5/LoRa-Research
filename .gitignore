@@ -1,3 +1,4 @@
 # Build directories
 .build/
 p2p/**/build/
+peer_eval/*
