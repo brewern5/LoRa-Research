@@ -16,15 +16,17 @@ size: 16:9
 
 # Acomplishment
 
-- Created a half-duplex peer-2-peer interface with both 915MHz and 433MHz LoRa devices. 
+- Created a half-duplex peer-2-peer interface on 915MHz LoRa devices. 
 - Understand and preparing testing for understand Spreading Factor and bandwidth.
+- Packet structure and protocol
 
 ---
 
-# Unknowns
+# Encountered Unknowns
 ## Known Unknowns
  - How to use and program LoRa devices (Via ESP32)
  - How to create a half-duplex LoRa network
+ - How to structure LoRa packets
  - Antenna regulations (different power regulations)
 
 ## Unknown Unknowns 
@@ -36,6 +38,7 @@ size: 16:9
 
 # Encountered Challenges
 - Combination of incompatble 915MHz devices with 433MHz devices
+- Managing multiple files in Arduino IDE
 
 --- 
 
@@ -57,17 +60,36 @@ size: 16:9
 
 ## Serialization
     - Data converted to byte sequences
+      - Sent sequentially through *usually* single line
+    - Most used today
 
 ## Parallelization
     - Data sent as multiple bits through multiple lines
+    - More cables = more expensive but also faster
 ---
+# Learning with AI pt.3 
 
+## C++ pointers and references
+- Reference
+  - Avoids creating a copy of an object rather a reference to the original
+  - More permanent
+- Pointer 
+  - Stores the memory address of another variable
+    - Great for data structure iteration
+    - More variable, can be reassigned
+## Header files
+- Storage declarations of functions, classes, and structures 
+
+---
 # Next steps
 - Create testing simulation 
-  - Add SD card reader for local logging
+  - Send test compressed audio file and compare to raw audio
   - Add GPS/GNSS module for accurate positioning
-- Begin Testing
+- Next sprint, start creating a LoRa mesh network.
 
+## Learning with AI - Next
+- C++ memory management on memory limited devices
+- Serialization vs. Parallelization in network comms
 
 ---
 
