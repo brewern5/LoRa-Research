@@ -6,6 +6,7 @@
 // SD Card manager
 SdManager sdMgr;
 AudioPacket packet;
+bool g_sd_ready = false;
 
 LoRaManager lora;
 
@@ -13,6 +14,10 @@ LoRaManager lora;
 uint16_t g_session_id;
 uint16_t g_seq_num;
 uint32_t timeout_ms = 2000;
+
+// Placeholder location until GPS integration is added
+constexpr float kDefaultLat = 0.0f;
+constexpr float kDefaultLon = 0.0f;
 
 // ──────────────────────────────────────────────
 //  Demo audio data (replace with real source)
@@ -26,6 +31,18 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
   Serial.println("\n=== LoRa Audio Transmitter ===");
+
+  Serial.println("Initializing SD...");
+
+  
+  g_sd_ready = sdMgr.init();
+  delay(2000);
+  if (!g_sd_ready) {
+    Serial.println("SD init failed; logging disabled");
+  // } else {
+  //   Serial.println("SD ready; logging to lora_log.csv");
+  }
+  
 
   Serial.println("Initializing LoRa...");
 
@@ -43,6 +60,14 @@ void setup() {
 
 void loop() {
 
+  auto logAck = [&](uint32_t txTimeMs, bool ackOk) {
+    if (!g_sd_ready) return;
+    const uint32_t ackTimeMs = millis();
+    const int rssi = ackOk ? static_cast<int>(lora.getLastRSSI()) : 0;
+    const float snr = ackOk ? lora.getLastSNR() : 0.0f;
+    sdMgr.logTransmission(kDefaultLat, kDefaultLon, txTimeMs, ackTimeMs, rssi, snr);
+  };
+
   // ── Calculate fragmentation ──────────────────
   uint16_t total_frags = (DEMO_AUDIO_LEN + LORA_MAX_DATA_PAYLOAD - 1)
                          / LORA_MAX_DATA_PAYLOAD;
@@ -53,13 +78,15 @@ void loop() {
                 DEMO_AUDIO_LEN, total_frags, audio_crc);
 
   // ── 1. Send AUDIO_START ──────────────────────
+  uint32_t startTxTime = millis();
   if (!lora.sendAudioStart(total_frags, 0x00 /*raw PCM*/, 8000, 64, DEMO_AUDIO_LEN)) {
     Serial.println("START failed — retrying in 5s");
     delay(5000);
     return;
   }
   // Optional: wait for ACK on START
-  lora.waitForAck(lora.getLastSeqNum(), timeout_ms);
+  bool startAckOk = lora.waitForAck(lora.getLastSeqNum(), timeout_ms);
+  logAck(startTxTime, startAckOk);
 
   // ── 2. Send DATA fragments ───────────────────
   size_t offset = 0;
@@ -74,8 +101,10 @@ void loop() {
   }
 
   // ── 3. Send AUDIO_END ────────────────────────
+  uint32_t endTxTime = millis();
   lora.sendAudioEnd(total_frags, audio_crc);
-  lora.waitForAck(lora.getLastSeqNum(), timeout_ms);
+  bool endAckOk = lora.waitForAck(lora.getLastSeqNum(), timeout_ms);
+  logAck(endTxTime, endAckOk);
 
   // ── Bump session for next run ────────────────
   g_session_id++;
