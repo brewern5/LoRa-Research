@@ -1,4 +1,5 @@
 # Build directories
 .build/
 p2p/**/build/
-peer_eval/*
+peer_eval/ASE485/*
+peer_eval/CSC/*
