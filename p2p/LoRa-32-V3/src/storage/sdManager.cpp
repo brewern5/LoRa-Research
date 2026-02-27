@@ -16,7 +16,7 @@ bool SdManager::init() {
     Serial.println("SPI Started");
   }
 
-  SdSpiConfig sdConfig(SD_CS, DEDICATED_SPI, SD_SCK_MHZ(6), &_spiSD);
+  SdSpiConfig sdConfig(SD_CS, DEDICATED_SPI, SD_SCK_MHZ(8), &_spiSD);
 
   Serial.println("Testing SD card presence...");
   pinMode(SD_CS, OUTPUT);
@@ -28,6 +28,7 @@ bool SdManager::init() {
   delay(100);
 
   if (!_sd.begin(sdConfig)) {
+    Serial.print("SD Error Code - ");
     Serial.println(_sd.sdErrorCode(), HEX);
     _sd.initErrorHalt(&Serial);
     Serial.println("SD init failed - Checking Card");
@@ -38,8 +39,10 @@ bool SdManager::init() {
 
   Serial.print("FAT type: ");
   Serial.println(_sd.fatType());  // Should print 32
-  Serial.print("Free clusters: ");
-  Serial.println(_sd.freeClusterCount());
+
+  // Takes too long to do
+  //Serial.print("Free clusters: ");
+  //Serial.println(_sd.freeClusterCount());
 
 
   // Ensure the log file exists and has a header so runtime logging can't fail silently

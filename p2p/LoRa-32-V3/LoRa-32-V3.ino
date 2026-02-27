@@ -1,9 +1,11 @@
+#include <Arduino.h>
 #include <RadioLib.h>
+
 #include "src/models/packet.h"
 #include "src/storage/SdManager.h"
 #include "src/comms/LoraManager.h"
+#include "src/display/StatusDisplay.h"
 
-// SD Card manager
 SdManager sdMgr;
 AudioPacket packet;
 bool g_sd_ready = false;
@@ -14,6 +16,9 @@ LoRaManager lora;
 uint16_t g_session_id;
 uint16_t g_seq_num;
 uint32_t timeout_ms = 2000;
+
+// Display
+
 
 // Placeholder location until GPS integration is added
 constexpr float kDefaultLat = 0.0f;
@@ -32,29 +37,34 @@ void setup() {
   delay(2000);
   Serial.println("\n=== LoRa Audio Transmitter ===");
 
+  Serial.println("Initializing Display...");
+  StatusDisplay::init();
+
   Serial.println("Initializing SD...");
 
-  
   g_sd_ready = sdMgr.init();
   delay(2000);
   if (!g_sd_ready) {
     Serial.println("SD init failed; logging disabled");
+    StatusDisplay::setSD(g_sd_ready = false);
   // } else {
   //   Serial.println("SD ready; logging to lora_log.csv");
   }
-  
+  StatusDisplay::setSD(g_sd_ready = true);
+
 
   Serial.println("Initializing LoRa...");
-
   // Generate a simple session ID from millis() — replace with something
   // more robust (e.g. random32, incrementing NVS counter) in production
   g_session_id = (uint16_t)(millis() & 0xFFFF);
   g_seq_num = 0;
+  bool loraOk = lora.init(&g_session_id, &g_seq_num);
 
-  lora.init(&g_session_id, &g_seq_num);
+  StatusDisplay::setLoRa(loraOk ? StatusDisplay::LORA_OK_IDLE : StatusDisplay::LORA_FAIL);
 
   Serial.printf("Session: 0x%04X\n", g_session_id);
   Serial.println("LoRa ready\n");
+  
 }
 
 
@@ -95,7 +105,9 @@ void loop() {
     if (!lora.sendAudioData(DEMO_AUDIO + offset, (uint8_t)chunk)) {
       Serial.printf("DATA frag %u failed\n", frag);
       // In production: implement retransmit or NACK handling here
+      StatusDisplay::setMessage("Failed Sending Data Frag!");
     }
+    StatusDisplay::onPacketSent();
     offset += chunk;
     delay(50); // Small inter-packet gap; tune to your duty cycle / SF
   }

@@ -9,9 +9,11 @@
         "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32s3-libs\\3.3.7\\qio_qspi\\include/**",
         "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\cores\\esp32/**",
         "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\variants\\heltec_wifi_lora_32_V3/**",
+        "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\internal\\ESP8266_and_ESP32_OLED_driver_for_SSD1306_displays_4.6.2_fa84c6b\\ESP8266 and ESP32 OLED driver for SSD1306 displays\\src/**",
         "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\internal\\RadioLib_7.6.0_c6cc8f17879cefb9\\RadioLib\\src/**",
         "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\internal\\SdFat_2.3.0_ef0dcc0578a48cdd\\SdFat\\src/**",
-        "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\SPI\\src/**"
+        "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\SPI\\src/**",
+        "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\Wire\\src/**"
       ],
       "forcedInclude": [
         "C:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\cores\\esp32\\Arduino.h"
@@ -61,9 +63,11 @@
         "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\esp32s3-libs\\3.3.7/qio_qspi/include",
         "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\cores\\esp32",
         "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\variants\\heltec_wifi_lora_32_V3",
+        "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\internal\\ESP8266_and_ESP32_OLED_driver_for_SSD1306_displays_4.6.2_fa84c6b\\ESP8266 and ESP32 OLED driver for SSD1306 displays\\src",
         "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\internal\\RadioLib_7.6.0_c6cc8f17879cefb9\\RadioLib\\src",
         "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\internal\\SdFat_2.3.0_ef0dcc0578a48cdd\\SdFat\\src",
         "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\SPI\\src",
+        "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\Wire\\src",
         "@D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\build_default/build_opt.h",
         "@D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\build_default/file_opts",
         "D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\build_default\\sketch\\LoRa-32-V3.ino.cpp",
