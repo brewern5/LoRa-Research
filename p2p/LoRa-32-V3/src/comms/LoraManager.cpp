@@ -1,4 +1,5 @@
 #include "LoraManager.h"
+#include <SPI.h>
 
 bool LoRaManager::init(uint16_t *g_session_id, uint16_t *g_seq_num) {
   int state = _radio.begin(
@@ -19,6 +20,24 @@ bool LoRaManager::init(uint16_t *g_session_id, uint16_t *g_seq_num) {
   }
 
   return true;
+}
+
+void LoRaManager::resetSPI() {
+  // Ensure SD card is deselected
+  pinMode(34, OUTPUT); // SD_CS
+  digitalWrite(34, HIGH);
+  delayMicroseconds(10);
+  
+  // Reset SPI bus
+  SPI.end();
+  delayMicroseconds(50);
+  SPI.begin();
+  delayMicroseconds(10);
+  
+  // Ensure LoRa NSS is high before operations
+  pinMode(LORA_NSS, OUTPUT);
+  digitalWrite(LORA_NSS, HIGH);
+  delayMicroseconds(5);
 }
 
 /*
@@ -43,6 +62,9 @@ int LoRaManager::_sendPacket(const LoRaAudioPacket* pkt, size_t payload_len) {
     return -1;
   }
 
+  // Reset SPI before transmission
+  resetSPI();
+  
   // Cast struct to raw bytes for RadioLib
   return _radio.transmit(reinterpret_cast<const uint8_t*>(pkt), total_len);
 }
@@ -124,6 +146,10 @@ bool LoRaManager::sendAudioData(const uint8_t* data, uint8_t len) {
   uint8_t buf[LORA_MAX_PAYLOAD];
   serializeHeader(&pkt.header, buf);
   memcpy(buf + LORA_HEADER_SIZE, dp.data, len);
+  
+  // Reset SPI before transmission
+  resetSPI();
+  
   int state = _radio.transmit(buf, LORA_HEADER_SIZE + len);
   
   if (state == RADIOLIB_ERR_NONE) {
@@ -169,6 +195,9 @@ bool LoRaManager::sendAudioEnd(uint16_t frag_count, uint32_t full_crc32) {
  * @param timeout_ms    How long to wait in milliseconds
  */
 bool LoRaManager::waitForAck(uint16_t expected_seq, uint32_t timeout_ms) {
+  // Reset SPI before receive
+  resetSPI();
+  
   uint8_t buf[LORA_MAX_PAYLOAD];
   int state = _radio.receive(buf, sizeof(buf));
 

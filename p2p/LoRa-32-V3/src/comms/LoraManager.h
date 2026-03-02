@@ -24,6 +24,7 @@
 class LoRaManager {
     public:
         bool init(uint16_t *g_session_id, uint16_t *g_seq_num);
+        void resetSPI();
 
         bool sendAudioStart(uint16_t total_frags, uint8_t codec,
                     uint16_t sample_hz, uint16_t duration_ms,
