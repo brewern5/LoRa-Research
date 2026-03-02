@@ -3,3 +3,7 @@
 p2p/**/build/
 peer_eval/ASE485/*
 peer_eval/CSC/*
+
+# Local env files for per-sketch VS Code configs
+p2p/LoRa-32-V3/tx/.env
+p2p/LoRa-32-V3/rx/.env

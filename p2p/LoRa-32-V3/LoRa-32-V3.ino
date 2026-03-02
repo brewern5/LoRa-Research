@@ -7,7 +7,6 @@
 #include "src/display/StatusDisplay.h"
 
 SdManager sdMgr;
-AudioPacket packet;
 bool g_sd_ready = false;
 
 LoRaManager lora;
@@ -17,7 +16,6 @@ uint16_t g_session_id;
 uint16_t g_seq_num;
 uint32_t timeout_ms = 2000;
 
-// Display
 
 
 // Placeholder location until GPS integration is added

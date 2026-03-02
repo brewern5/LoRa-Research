@@ -6,11 +6,20 @@ size: 16:9
 ---
 
 
-# SP1 Presentation 
+# S1P Presentation 
 
 ## LoRa
 
 **Nate Brewer**
+
+---
+
+# Problem
+
+Infrastructureless environments lack modern day human-scale communication capabilities.
+
+## Solution 
+Create a LoRa network with AI semantic compression to meet LoRa restrictions
 
 ---
 
@@ -19,7 +28,9 @@ size: 16:9
 - Created a half-duplex peer-2-peer interface on 915MHz LoRa devices. 
 - Understand and preparing testing for understand Spreading Factor and bandwidth.
 - Packet structure and protocol
+- Audio compression. .wav/.mp3 -> .bin (60% compression rate)
 
+LoC - 5,177 (LoRa) - ~2200 AI model 
 ---
 
 # Encountered Unknowns
@@ -33,12 +44,15 @@ size: 16:9
  - The regulatory statues on LoRa transmission
    - Duty Cycle limitations
    - 433MHz vs 915MHz frequency 
+ - Multi-SPI interfacing with LoRa and SD card reader
+
 
 ---
 
 # Encountered Challenges
 - Combination of incompatble 915MHz devices with 433MHz devices
 - Managing multiple files in Arduino IDE
+- Splitting current AI model into a constructor and compressor
 
 --- 
 
@@ -82,14 +96,16 @@ size: 16:9
 
 ---
 # Next steps
-- Create testing simulation 
+- Create testing simulation for LoRa between raw audio and our compressed audio
   - Send test compressed audio file and compare to raw audio
   - Add GPS/GNSS module for accurate positioning
 - Next sprint, start creating a LoRa mesh network.
+- 
 
 ## Learning with AI - Next
 - C++ memory management on memory limited devices
 - Serialization vs. Parallelization in network comms
+  - Different subsets of SPI (HSPI, FSPI)
 
 ---
 

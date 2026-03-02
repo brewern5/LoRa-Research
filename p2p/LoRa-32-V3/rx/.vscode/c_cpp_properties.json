@@ -1,0 +1,50 @@
+{
+  "configurations": [
+    {
+      "name": "Arduino-RX",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/../src/**",
+        "${env:ARDUINO_USER_LIBRARIES}/**",
+        "${env:ARDUINO_PACKAGES_PATH}/packages/esp32/hardware/esp32/${env:ESP32_ARDUINO_VERSION}/cores/esp32/**",
+        "${env:ARDUINO_PACKAGES_PATH}/packages/esp32/hardware/esp32/${env:ESP32_ARDUINO_VERSION}/variants/heltec_wifi_lora_32_V3/**",
+        "${env:ARDUINO_PACKAGES_PATH}/packages/esp32/hardware/esp32/${env:ESP32_ARDUINO_VERSION}/libraries/SPI/src/**",
+        "${env:ARDUINO_PACKAGES_PATH}/packages/esp32/hardware/esp32/${env:ESP32_ARDUINO_VERSION}/libraries/Wire/src/**"
+      ],
+      "forcedInclude": [
+        "${env:ARDUINO_PACKAGES_PATH}/packages/esp32/hardware/esp32/${env:ESP32_ARDUINO_VERSION}/cores/esp32/Arduino.h"
+      ],
+      "compilerPath": "${env:ARDUINO_GXX_PATH}",
+      "defines": [
+        "F_CPU=240000000L",
+        "ARDUINO=10607",
+        "ARDUINO_HELTEC_WIFI_LORA_32_V3",
+        "ARDUINO_ARCH_ESP32",
+        "ARDUINO_BOARD=\"HELTEC_WIFI_LORA_32_V3\"",
+        "ARDUINO_VARIANT=\"heltec_wifi_lora_32_V3\"",
+        "ARDUINO_FQBN=\"esp32:esp32:heltec_wifi_lora_32_V3\"",
+        "ESP32=ESP32",
+        "CORE_DEBUG_LEVEL=0",
+        "ARDUINO_RUNNING_CORE=1",
+        "ARDUINO_EVENT_RUNNING_CORE=1",
+        "REGION_EU868",
+        "MCU_ESP32_S3",
+        "HELTEC_BOARD=30",
+        "WIFI_LORA_32_V3",
+        "SLOW_CLK_TPYE=0",
+        "RADIO_CHIP_SX1262",
+        "LoRaWAN_DEBUG_LEVEL=0",
+        "ACTIVE_REGION=LORAMAC_REGION_EU868",
+        "LORAWAN_PREAMBLE_LENGTH=8",
+        "LORAWAN_DEVEUI_AUTO=0",
+        "ARDUINO_USB_MODE=1",
+        "ARDUINO_USB_CDC_ON_BOOT=0",
+        "ARDUINO_USB_MSC_ON_BOOT=0",
+        "ARDUINO_USB_DFU_ON_BOOT=0"
+      ],
+      "cStandard": "c17",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}

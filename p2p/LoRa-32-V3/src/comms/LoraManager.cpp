@@ -238,3 +238,53 @@ bool LoRaManager::waitForAck(uint16_t expected_seq, uint32_t timeout_ms) {
                 ack.ack_seq, _radio.getRSSI(), _radio.getSNR());
   return true;
 }
+
+bool LoRaManager::receiveRaw(uint8_t* out, size_t out_size, size_t* received_len) {
+  if (out == nullptr || out_size == 0) {
+    return false;
+  }
+
+  resetSPI();
+  int state = _radio.receive(out, out_size);
+  if (state != RADIOLIB_ERR_NONE) {
+    return false;
+  }
+
+  size_t packet_len = static_cast<size_t>(_radio.getPacketLength());
+  if (received_len != nullptr) {
+    *received_len = packet_len;
+  }
+
+  return packet_len > 0;
+}
+
+bool LoRaManager::sendAckFor(const LoRaHeader& receivedHeader, uint8_t status) {
+  LoRaAudioPacket pkt;
+  memset(&pkt, 0, sizeof(pkt));
+
+  buildHeader(
+    &pkt.header,
+    PKT_ACK,
+    receivedHeader.dst_id,
+    receivedHeader.src_id,
+    receivedHeader.exp_id,
+    receivedHeader.session_id,
+    receivedHeader.seq_num,
+    TX_POWER_DBM,
+    TX_SF,
+    TX_CR
+  );
+
+  AckPayload& ack = pkt.payload.ack;
+  ack.ack_seq = receivedHeader.seq_num;
+  ack.status = status;
+
+  int state = _sendPacket(&pkt, sizeof(AckPayload));
+  if (state == RADIOLIB_ERR_NONE) {
+    Serial.printf("[TX] ACK sent for seq=%u status=0x%02X\n", ack.ack_seq, ack.status);
+    return true;
+  }
+
+  Serial.printf("[TX] ACK send failed for seq=%u code=%d\n", ack.ack_seq, state);
+  return false;
+}

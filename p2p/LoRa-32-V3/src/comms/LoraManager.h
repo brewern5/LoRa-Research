@@ -32,6 +32,8 @@ class LoRaManager {
         bool sendAudioData(const uint8_t* data, uint8_t len);
         bool sendAudioEnd(uint16_t frag_count, uint32_t full_crc32);
         bool waitForAck(uint16_t expected_seq, uint32_t timeout_ms);
+        bool receiveRaw(uint8_t* out, size_t out_size, size_t* received_len = nullptr);
+        bool sendAckFor(const LoRaHeader& receivedHeader, uint8_t status = ACK_STATUS_OK);
 
         // Expose for logging after ACK
         float getLastRSSI() { return _radio.getRSSI(); }

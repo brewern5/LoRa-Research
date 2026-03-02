@@ -56,6 +56,9 @@ The **RadioLib** library is used for LoRa communication due to its excellent int
 
 This project is developed using **Visual Studio Code** with the **Arduino Maker Workshop** extension, which provides enhanced Arduino development capabilities including improved IntelliSense, debugging support, and build management.
 
+### Use with Arduino IDE
+This project should be able to compile and upload via Arduino IDE. This has not been confirmed.
+
 ## Important Clarifications
 
 - Audio is converted to a `.bin` file **before** it reaches this device.
