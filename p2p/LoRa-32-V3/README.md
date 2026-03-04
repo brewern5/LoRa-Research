@@ -33,6 +33,21 @@ Provides real-time status feedback through the built-in OLED display. Serves as 
 ### src/storage/SdManager
 Handles all SD card operations including audio file reading, binary file I/O, and transmission logging. Manages SPI bus sharing with the LoRa radio and provides structured logging for post-experiment analysis.
 
+#### CSV Timestamp Format (ISO 8601)
+
+`lora_log.csv` now includes UTC ISO 8601 timestamp fields for cross-referencing with external logs/tools:
+
+- `timestamp_utc` → row write time in UTC (ISO 8601, e.g. `2026-03-03T18:42:11.237Z`)
+- `tx_time_utc` → TX event time in UTC (ISO 8601)
+- `ack_time_utc` → ACK event time in UTC (ISO 8601)
+
+The original millisecond fields are still present for device-relative timing math:
+
+- `millis`
+- `tx_time`
+- `ack_time`
+- `rtt_ms`
+
 ### src/models/packet
 Defines the custom LoRa packet protocol structure including headers, payload types, and serialization/deserialization functions. Implements the framing logic for audio file transfers over LoRa.
 
@@ -63,6 +78,7 @@ This project should be able to compile and upload via Arduino IDE. This has not 
 
 - Audio is converted to a `.bin` file **before** it reaches this device.
 - The device reads that `.bin` payload and fragments it into LoRa protocol packets.
+- TX now reads `lora_payload.bin` from the SD card root and supports varying file sizes by automatic fragmenting.
 - The name `AudioPacket` in code is a generic container/chunk name used during file reads and packet transport.
 - `AudioPacket` does **not** mean the payload is raw audio format metadata by itself; it is transport framing.
 

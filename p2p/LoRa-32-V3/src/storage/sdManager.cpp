@@ -1,10 +1,13 @@
 #include "SdManager.h"
+#include <time.h>
 
 SdManager::SdManager() : _spiSD(FSPI) {}
 
 namespace {
   constexpr uint8_t kSdCmd18Error = 0x0C;
   constexpr uint8_t kLoRaNssPin = 8;
+
+  constexpr int kIso8601BufferLen = 32;
 
   inline void quiesceSharedSpiDevices() {
     pinMode(kLoRaNssPin, OUTPUT);
@@ -22,6 +25,44 @@ namespace {
     const bool n = (dot[3] == 'n' || dot[3] == 'N');
     const bool end = (dot[4] == '\0');
     return b && i && n && end;
+  }
+
+  int monthFromShortName(const char* month) {
+    static const char* kMonths[] = {
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+    for (int index = 0; index < 12; ++index) {
+      if (strncmp(month, kMonths[index], 3) == 0) {
+        return index + 1;
+      }
+    }
+    return 1;
+  }
+
+  int64_t daysFromCivil(int year, unsigned month, unsigned day) {
+    year -= (month <= 2);
+    const int era = (year >= 0 ? year : year - 399) / 400;
+    const unsigned yoe = static_cast<unsigned>(year - era * 400);
+    const unsigned doy = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1;
+    const unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    return static_cast<int64_t>(era) * 146097 + static_cast<int64_t>(doe) - 719468;
+  }
+
+  time_t compileEpochUtc() {
+    char monthText[4] = {0, 0, 0, 0};
+    int day = 1;
+    int year = 1970;
+    int hour = 0;
+    int minute = 0;
+    int second = 0;
+
+    sscanf(__DATE__, "%3s %d %d", monthText, &day, &year);
+    sscanf(__TIME__, "%d:%d:%d", &hour, &minute, &second);
+
+    const int month = monthFromShortName(monthText);
+    const int64_t days = daysFromCivil(year, static_cast<unsigned>(month), static_cast<unsigned>(day));
+    return static_cast<time_t>(days * 86400LL + hour * 3600LL + minute * 60LL + second);
   }
 }
 
@@ -76,6 +117,8 @@ bool SdManager::init() {
     return false;
   }
   _logHeaderChecked = true;
+
+  _initializeTimeBase();
 
   _ready = true;
   return true;
@@ -285,8 +328,11 @@ bool SdManager::logTransmission(float lat, float lon, uint32_t txTime,
 // Helpers to keep CSV order consistent and avoid brittle manual prints
 namespace {
   constexpr const char* LOG_COLUMNS[] = {
+    "timestamp_utc",
     "millis",
+    "tx_time_utc",
     "tx_time",
+    "ack_time_utc",
     "ack_time",
     "rtt_ms",
     "lat",
@@ -301,6 +347,44 @@ namespace {
     "status"
   };
   constexpr size_t LOG_COLUMN_COUNT = sizeof(LOG_COLUMNS) / sizeof(LOG_COLUMNS[0]);
+  constexpr const char* EXPECTED_LOG_HEADER =
+    "timestamp_utc,millis,tx_time_utc,tx_time,ack_time_utc,ack_time,rtt_ms,lat,lon,rssi,snr,session_id,seq_num,frag_index,frag_len,packet_type,status";
+}
+
+void SdManager::_initializeTimeBase() {
+  const uint32_t nowMs = millis();
+  const time_t nowEpoch = time(nullptr);
+
+  if (nowEpoch > 1700000000) {
+    const uint64_t nowEpochMs = static_cast<uint64_t>(nowEpoch) * 1000ULL;
+    _epochBaseMs = (nowEpochMs > nowMs) ? (nowEpochMs - nowMs) : 0;
+    return;
+  }
+
+  _epochBaseMs = static_cast<uint64_t>(compileEpochUtc()) * 1000ULL;
+}
+
+uint64_t SdManager::_toEpochMs(uint32_t msSinceBoot) const {
+  return _epochBaseMs + static_cast<uint64_t>(msSinceBoot);
+}
+
+void SdManager::_formatIso8601(uint64_t epochMs, char* out, size_t outLen) const {
+  if (!out || outLen == 0) {
+    return;
+  }
+
+  const time_t epochSec = static_cast<time_t>(epochMs / 1000ULL);
+  const unsigned millisPart = static_cast<unsigned>(epochMs % 1000ULL);
+  struct tm utcTime;
+
+  if (!gmtime_r(&epochSec, &utcTime)) {
+    snprintf(out, outLen, "1970-01-01T00:00:00.000Z");
+    return;
+  }
+
+  char dateTimePart[24];
+  strftime(dateTimePart, sizeof(dateTimePart), "%Y-%m-%dT%H:%M:%S", &utcTime);
+  snprintf(out, outLen, "%s.%03uZ", dateTimePart, millisPart);
 }
 
 bool SdManager::_ensureLogFile() {
@@ -311,6 +395,19 @@ bool SdManager::_ensureLogFile() {
   }
 
   if (!_logHeaderChecked) {
+    if (_sd.exists("lora_log.csv") && !_hasExpectedLogHeader()) {
+      const char* legacyName = "lora_log_legacy.csv";
+      if (_sd.exists(legacyName)) {
+        _sd.remove(legacyName);
+      }
+
+      if (!_sd.rename("lora_log.csv", legacyName)) {
+        Serial.println("[SD] Failed to rotate legacy CSV header");
+        return false;
+      }
+      Serial.println("[SD] Rotated legacy CSV to lora_log_legacy.csv");
+    }
+
     const bool headerCreated = writeLogHeader();
     if (headerCreated) {
       Serial.println("[SD] Created lora_log.csv with header");
@@ -333,6 +430,33 @@ bool SdManager::_ensureLogFile() {
   return true;
 }
 
+bool SdManager::_hasExpectedLogHeader() {
+  File32 headerFile;
+  if (!headerFile.open("lora_log.csv", O_READ)) {
+    return false;
+  }
+
+  char headerLine[196];
+  size_t index = 0;
+  while (headerFile.available() && index < (sizeof(headerLine) - 1)) {
+    const int raw = headerFile.read();
+    if (raw < 0) {
+      break;
+    }
+
+    const char current = static_cast<char>(raw);
+    if (current == '\n' || current == '\r') {
+      break;
+    }
+
+    headerLine[index++] = current;
+  }
+  headerLine[index] = '\0';
+  headerFile.close();
+
+  return strcmp(headerLine, EXPECTED_LOG_HEADER) == 0;
+}
+
 void SdManager::_writeLogHeader(File32& file) {
   for (size_t i = 0; i < LOG_COLUMN_COUNT; ++i) {
     file.print(LOG_COLUMNS[i]);
@@ -343,6 +467,14 @@ void SdManager::_writeLogHeader(File32& file) {
 bool SdManager::_writeLogRow(File32& file, const LogRow& row) {
   const float lat = row.lat;
   const float lon = row.lon;
+  char nowIso[kIso8601BufferLen];
+  char txIso[kIso8601BufferLen];
+  char ackIso[kIso8601BufferLen];
+
+  _formatIso8601(_toEpochMs(row.nowMs), nowIso, sizeof(nowIso));
+  _formatIso8601(_toEpochMs(row.txTime), txIso, sizeof(txIso));
+  _formatIso8601(_toEpochMs(row.ackTime), ackIso, sizeof(ackIso));
+
   bool ok = true;
 
   auto mustWrite = [&](size_t count) {
@@ -352,8 +484,11 @@ bool SdManager::_writeLogRow(File32& file, const LogRow& row) {
   };
 
   // Print in the exact same order as LOG_COLUMNS
+  mustWrite(file.print(nowIso)); mustWrite(file.print(','));
   mustWrite(file.print(row.nowMs)); mustWrite(file.print(','));
+  mustWrite(file.print(txIso)); mustWrite(file.print(','));
   mustWrite(file.print(row.txTime)); mustWrite(file.print(','));
+  mustWrite(file.print(ackIso)); mustWrite(file.print(','));
   mustWrite(file.print(row.ackTime)); mustWrite(file.print(','));
   mustWrite(file.print(row.rttMs)); mustWrite(file.print(','));
   mustWrite(file.print(lat, 6)); mustWrite(file.print(','));

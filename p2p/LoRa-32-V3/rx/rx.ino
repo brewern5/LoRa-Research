@@ -46,7 +46,7 @@ void setup() {
 
   Serial.println("Initializing LoRa...");
   bool loraOk = lora.init(&g_session_id, &g_seq_num);
-  StatusDisplay::setLoRa(loraOk ? StatusDisplay::LORA_RECEIVING : StatusDisplay::LORA_FAIL);
+  StatusDisplay::setLoRa(loraOk ? StatusDisplay::LORA_OK_IDLE : StatusDisplay::LORA_FAIL);
   Serial.println(loraOk ? "LoRa RX ready\n" : "LoRa RX init failed\n");
 }
 
@@ -58,6 +58,8 @@ void loop() {
     delay(20);
     return;
   }
+
+  StatusDisplay::setLoRa(StatusDisplay::LORA_RECEIVING);
 
   const uint32_t rxTimeMs = millis();
   const int rssi = static_cast<int>(lora.getLastRSSI());
@@ -89,7 +91,6 @@ void loop() {
                 snr);
 
   StatusDisplay::onPacketReceived();
-  StatusDisplay::setLoRa(StatusDisplay::LORA_RECEIVING);
 
   if (g_sd_ready) {
     sdMgr.logTransmission(kDefaultLat, kDefaultLon, rxTimeMs, rxTimeMs, rssi, snr,
@@ -104,4 +105,6 @@ void loop() {
                           hdr.session_id, hdr.seq_num, fragIndex, fragLen,
                           packetTypeStr, ackSent ? "ACK_SENT" : "ACK_SEND_FAIL");
   }
+
+  StatusDisplay::setLoRa(StatusDisplay::LORA_OK_IDLE);
 }

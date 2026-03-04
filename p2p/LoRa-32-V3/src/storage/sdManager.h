@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <SdFat.h>
 #include <SPI.h>
+#include <stdint.h>
 
 // Heltex ESP32 LoRa V3 SDI pins
 #define SD_CS 34
@@ -51,8 +52,12 @@ class SdManager {
       };
 
       bool _ensureLogFile();
+      bool _hasExpectedLogHeader();
       void _writeLogHeader(File32& file);
       bool _writeLogRow(File32& file, const LogRow& row);
+      void _initializeTimeBase();
+      uint64_t _toEpochMs(uint32_t msSinceBoot) const;
+      void _formatIso8601(uint64_t epochMs, char* out, size_t outLen) const;
 
       SdFat32 _sd; // The manager for the sd card
       File32 _audioFile;
@@ -63,6 +68,7 @@ class SdManager {
 
       bool _ready = false;
       bool _logHeaderChecked = false;
+      uint64_t _epochBaseMs = 0;
 };
 
 enum LogStatus { LOG_OK, LOG_FAIL };

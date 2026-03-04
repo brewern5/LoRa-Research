@@ -88,6 +88,8 @@ public:
   static void refresh();
 
 private:
+  static bool shouldDeferRedraw();
+  static void requestRedraw(bool force = false);
   static void redraw();
 
   static SSD1306Wire _display;
@@ -97,4 +99,5 @@ private:
   static uint32_t   _txCount;
   static uint32_t   _rxCount;
   static String     _message;
+  static bool       _dirty;
 };

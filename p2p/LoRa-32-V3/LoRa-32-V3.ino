@@ -22,12 +22,60 @@ uint32_t timeout_ms = 2000;
 constexpr float kDefaultLat = 0.0f;
 constexpr float kDefaultLon = 0.0f;
 
-// ──────────────────────────────────────────────
-//  Demo audio data (replace with real source)
-// ──────────────────────────────────────────────
-// 512 bytes of fake audio to demonstrate fragmentation
-static const uint8_t DEMO_AUDIO[512] = { /* fill with real PCM bytes */ 0 };
-static const size_t  DEMO_AUDIO_LEN  = sizeof(DEMO_AUDIO);
+constexpr const char* kPayloadFile = "lora_payload.bin";
+constexpr uint8_t kPayloadCodec = CODEC_RAW_PCM;
+constexpr uint16_t kPayloadSampleHz = 8000;
+constexpr uint16_t kPayloadDurationMs = 0;
+
+static uint32_t crc32Update(uint32_t crc, const uint8_t* data, size_t len) {
+  for (size_t i = 0; i < len; ++i) {
+    crc ^= data[i];
+    for (uint8_t bit = 0; bit < 8; ++bit) {
+      crc = (crc & 1U) ? ((crc >> 1) ^ 0xEDB88320UL) : (crc >> 1);
+    }
+  }
+  return crc;
+}
+
+static bool getPayloadStats(SdManager& manager, const char* filename,
+                            uint32_t& totalSize, uint16_t& totalFrags, uint32_t& payloadCrc) {
+  totalSize = 0;
+  totalFrags = 0;
+  payloadCrc = 0;
+
+  if (!manager.openAudioFile(filename)) {
+    Serial.printf("[TX] Unable to open payload file: %s\n", filename);
+    return false;
+  }
+
+  uint32_t crcState = 0xFFFFFFFFUL;
+  uint32_t fragCount = 0;
+  AudioPacket packet;
+  while (manager.readAudioChunk(packet)) {
+    if (packet.bytesRead <= 0) {
+      continue;
+    }
+    totalSize += static_cast<uint32_t>(packet.bytesRead);
+    crcState = crc32Update(crcState, packet.buffer, static_cast<size_t>(packet.bytesRead));
+    fragCount++;
+  }
+
+  manager.closeAudioFile();
+
+  if (totalSize == 0 || fragCount == 0) {
+    Serial.println("[TX] Payload file is empty");
+    return false;
+  }
+
+  if (fragCount > 0xFFFF) {
+    Serial.printf("[TX] Payload too large, fragments=%lu exceeds protocol max\n", static_cast<unsigned long>(fragCount));
+    return false;
+  }
+
+  totalFrags = static_cast<uint16_t>(fragCount);
+  payloadCrc = ~crcState;
+  return true;
+}
 
 
 void setup() {
@@ -67,6 +115,13 @@ void setup() {
 
 void loop() {
 
+  if (!g_sd_ready) {
+    Serial.println("SD not ready; cannot transmit payload file");
+    StatusDisplay::setMessage("SD not ready");
+    delay(2000);
+    return;
+  }
+
   auto logAck = [&](uint32_t txTimeMs, bool ackOk, const char* packetType, const char* status,
                     int16_t fragIndex, uint16_t fragLen) {
     if (!g_sd_ready) return;
@@ -85,21 +140,38 @@ void loop() {
     }
   };
 
-  // ── Calculate fragmentation ──────────────────
-  uint16_t total_frags = (DEMO_AUDIO_LEN + LORA_MAX_DATA_PAYLOAD - 1)
-                         / LORA_MAX_DATA_PAYLOAD;
+  uint32_t payloadSize = 0;
+  uint16_t total_frags = 0;
+  uint32_t audio_crc = 0;
+  if (!getPayloadStats(sdMgr, kPayloadFile, payloadSize, total_frags, audio_crc)) {
+    StatusDisplay::setMessage("Missing/invalid payload");
+    delay(3000);
+    return;
+  }
 
-  uint32_t audio_crc = crc32(DEMO_AUDIO, DEMO_AUDIO_LEN);
+  if (!sdMgr.openAudioFile(kPayloadFile)) {
+    Serial.printf("[TX] Failed to reopen payload file for transmit: %s\n", kPayloadFile);
+    StatusDisplay::setMessage("Payload open failed");
+    delay(3000);
+    return;
+  }
 
-  Serial.printf("Starting transfer: %u bytes, %u fragments, CRC32=0x%08X\n",
-                DEMO_AUDIO_LEN, total_frags, audio_crc);
+  Serial.printf("Starting transfer from %s: %lu bytes, %u fragments, CRC32=0x%08lX\n",
+                kPayloadFile,
+                static_cast<unsigned long>(payloadSize),
+                total_frags,
+                static_cast<unsigned long>(audio_crc));
+  StatusDisplay::setLoRa(StatusDisplay::LORA_TRANSMITTING);
+  StatusDisplay::setMessage("Transmitting payload...");
 
   // ── 1. Send AUDIO_START ──────────────────────
   uint32_t startTxTime = millis();
-  if (!lora.sendAudioStart(total_frags, 0x00 /*raw PCM*/, 8000, 64, DEMO_AUDIO_LEN)) {
+  if (!lora.sendAudioStart(total_frags, kPayloadCodec, kPayloadSampleHz, kPayloadDurationMs, payloadSize)) {
     Serial.println("START failed — retrying in 5s");
     delay(200);
     logAck(startTxTime, false, "START", "TX_FAIL", -1, 0);
+    sdMgr.closeAudioFile();
+    StatusDisplay::setLoRa(StatusDisplay::LORA_OK_IDLE);
     delay(5000);
     return;
   }
@@ -111,17 +183,21 @@ void loop() {
   delay(200);
 
   // ── 2. Send DATA fragments ───────────────────
-  size_t offset = 0;
   uint16_t dataOkCount = 0;
   uint16_t dataFailCount = 0;
-  for (uint16_t frag = 0; frag < total_frags; frag++) {
-    size_t chunk = min((size_t)LORA_MAX_DATA_PAYLOAD, DEMO_AUDIO_LEN - offset);
+  uint16_t frag = 0;
+  AudioPacket packet;
+  while (sdMgr.readAudioChunk(packet)) {
+    if (packet.bytesRead <= 0) {
+      continue;
+    }
+
+    const uint16_t chunk = static_cast<uint16_t>(packet.bytesRead);
     const uint32_t dataTxTime = millis();
-    bool dataSent = lora.sendAudioData(DEMO_AUDIO + offset, (uint8_t)chunk);
+    bool dataSent = lora.sendAudioData(packet.buffer, static_cast<uint8_t>(chunk));
 
     if (!dataSent) {
       Serial.printf("DATA frag %u failed\n", frag);
-      // In production: implement retransmit or NACK handling here
       StatusDisplay::setMessage("Failed Sending Data Frag!");
       dataFailCount++;
 
@@ -129,8 +205,8 @@ void loop() {
       logAck(dataTxTime, false, "DATA", "TX_FAIL", static_cast<int16_t>(frag), static_cast<uint16_t>(chunk));
       delay(200);
 
-      offset += chunk;
-      delay(50); // Small inter-packet gap; tune to your duty cycle / SF
+      frag++;
+      delay(50);
       continue;
     }
 
@@ -143,26 +219,30 @@ void loop() {
       StatusDisplay::setMessage("Data Frag ACK Timeout!");
     }
     delay(200);
-        logAck(dataTxTime, dataAckOk, "DATA", dataAckOk ? "ACK_OK" : "ACK_TIMEOUT",
-          static_cast<int16_t>(frag), static_cast<uint16_t>(chunk));
+    logAck(dataTxTime, dataAckOk, "DATA", dataAckOk ? "ACK_OK" : "ACK_TIMEOUT",
+           static_cast<int16_t>(frag), static_cast<uint16_t>(chunk));
 
     StatusDisplay::onPacketSent();
-    offset += chunk;
-    delay(50); // Small inter-packet gap; tune to your duty cycle / SF
+    frag++;
+    delay(50);
   }
 
+  sdMgr.closeAudioFile();
+
   Serial.printf("DATA summary: acked=%u failed_or_timeout=%u total=%u\n",
-                dataOkCount, dataFailCount, total_frags);
+                dataOkCount, dataFailCount, frag);
 
   // ── 3. Send AUDIO_END ────────────────────────
   uint32_t endTxTime = millis();
-  bool endSentOk = lora.sendAudioEnd(total_frags, audio_crc);
+  bool endSentOk = lora.sendAudioEnd(frag, audio_crc);
   bool endAckOk = endSentOk ? lora.waitForAck(lora.getLastSeqNum(), timeout_ms) : false;
   delay(200);
   logAck(endTxTime, endAckOk, "END", endSentOk ? (endAckOk ? "ACK_OK" : "ACK_TIMEOUT") : "TX_FAIL", -1, 0);
   delay(200);
 
   // ── Bump session for next run ────────────────
+  StatusDisplay::setLoRa(StatusDisplay::LORA_OK_IDLE);
+  StatusDisplay::setMessage("Transfer complete");
   g_session_id++;
   g_seq_num = 0;
 

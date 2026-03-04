@@ -9,6 +9,20 @@ StatusDisplay::LoRaState StatusDisplay::_loraState = StatusDisplay::LORA_FAIL;
 uint32_t StatusDisplay::_txCount   = 0;
 uint32_t StatusDisplay::_rxCount   = 0;
 String StatusDisplay::_message   = "";
+bool StatusDisplay::_dirty = false;
+
+bool StatusDisplay::shouldDeferRedraw() {
+  return _loraState == LORA_TRANSMITTING || _loraState == LORA_RECEIVING;
+}
+
+void StatusDisplay::requestRedraw(bool force) {
+  if (!force && shouldDeferRedraw()) {
+    _dirty = true;
+    return;
+  }
+  _dirty = false;
+  redraw();
+}
 
 // ── Lifecycle ────────────────────────────────────────────────────
 void StatusDisplay::init() {
@@ -49,38 +63,55 @@ void StatusDisplay::init() {
 // ── Public Endpoints ─────────────────────────────────────────────
 void StatusDisplay::setSD(bool ok) {
   _sdGood = ok;
-  redraw();
+  requestRedraw();
 }
 
 void StatusDisplay::setLoRa(LoRaState state) {
+  const bool wasBusy = (_loraState == LORA_TRANSMITTING || _loraState == LORA_RECEIVING);
+  const bool willBeBusy = (state == LORA_TRANSMITTING || state == LORA_RECEIVING);
+
+  if (_loraState == state && willBeBusy) {
+    return;
+  }
+
+  bool leavingBusy = (wasBusy && !willBeBusy);
   _loraState = state;
-  redraw();
+
+  if (willBeBusy) {
+    requestRedraw(true);
+    return;
+  }
+
+  if (leavingBusy && _dirty) {
+    requestRedraw(true);
+    return;
+  }
+
+  requestRedraw();
 }
 
 void StatusDisplay::onPacketSent() {
   _txCount++;
-  _loraState = LORA_OK_IDLE;
-  redraw();
+  requestRedraw();
 }
 
 void StatusDisplay::onPacketReceived() {
   _rxCount++;
-  _loraState = LORA_OK_IDLE;
-  redraw();
+  requestRedraw();
 }
 
 void StatusDisplay::setMessage(const String& msg) {
   _message = msg;
-  redraw();
+  requestRedraw();
 }
 
 void StatusDisplay::clearMessage() {
   _message = "";
-  redraw();
+  requestRedraw();
 }
 
 void StatusDisplay::refresh() {
-  redraw();
+  requestRedraw(true);
 }
 
 // ── Private Redraw ───────────────────────────────────────────────
