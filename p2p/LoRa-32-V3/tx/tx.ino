@@ -20,7 +20,7 @@ uint32_t timeout_ms = 2000;
 constexpr float kDefaultLat = 0.0f;
 constexpr float kDefaultLon = 0.0f;
 
-constexpr const char* kPayloadFile = "lora_payload.bin";
+constexpr const char* kPayloadFile = "lora_payload_new.bin";
 constexpr uint8_t kPayloadCodec = CODEC_RAW_PCM;
 constexpr uint16_t kPayloadSampleHz = 8000;
 constexpr uint16_t kPayloadDurationMs = 0;

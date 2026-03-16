@@ -70,9 +70,9 @@
         "-IC:\\Users\\bobjo\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.7\\libraries\\Wire\\src",
         "@D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\tx/build_opt.h",
         "@D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\tx/file_opts",
-        "D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\tx\\sketch\\tx.ino.cpp",
+        "D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\tx\\sketch\\src_bridge.cpp",
         "-o",
-        "D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\tx\\sketch\\tx.ino.cpp.o"
+        "D:\\GitHub\\LoRa-Research\\p2p\\LoRa-32-V3\\build\\tx\\sketch\\src_bridge.cpp.o"
       ],
       "defines": [
         "F_CPU=240000000L",
