@@ -1,6 +1,7 @@
 # Build directories
 .build/
 p2p/**/build/
+mesh/**/build/
 peer_eval/ASE485/*
 peer_eval/CSC/*
 

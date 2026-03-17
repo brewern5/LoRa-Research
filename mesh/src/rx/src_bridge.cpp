@@ -1,0 +1,5 @@
+#include "../src/models/packet.h"
+#include "../src/storage/SdManager.h"
+#include "../src/comms/LoraManager.h"
+#include "../src/comms/ResearchStateMachine.h"
+#include "../src/display/StatusDisplay.h"
