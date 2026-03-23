@@ -3,7 +3,7 @@
 #include "../src/models/packet.h"
 #include "../src/storage/SdManager.h"
 #include "../src/comms/LoraManager.h"
-#include "../src/comms/ResearchStateMachine.h"
+#include "../src/app/ResearchStateMachine.h"
 #include "../src/display/StatusDisplay.h"
 
 SdManager sdMgr;
@@ -104,12 +104,15 @@ void loop() {
                           packetTypeStr, "RX_RECV");
   }
 
-  const uint32_t ackTimeMs = millis();
-  bool ackSent = lora.sendAckFor(hdr, ACK_STATUS_OK);
-  if (g_sd_ready) {
-    sdMgr.logTransmission(kDefaultLat, kDefaultLon, rxTimeMs, ackTimeMs, rssi, snr,
-                          hdr.session_id, hdr.seq_num, fragIndex, fragLen,
-                          packetTypeStr, ackSent ? "ACK_SENT" : "ACK_SEND_FAIL");
+  // Never ACK an ACK frame to avoid ACK ping-pong.
+  if (packetType != PKT_ACK) {
+    const uint32_t ackTimeMs = millis();
+    bool ackSent = lora.sendAckFor(hdr, ACK_STATUS_OK);
+    if (g_sd_ready) {
+      sdMgr.logTransmission(kDefaultLat, kDefaultLon, rxTimeMs, ackTimeMs, rssi, snr,
+                            hdr.session_id, hdr.seq_num, fragIndex, fragLen,
+                            packetTypeStr, ackSent ? "ACK_SENT" : "ACK_SEND_FAIL");
+    }
   }
 
   state.transition(ResearchEvent::RX_PACKET_DONE);
