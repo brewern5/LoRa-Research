@@ -6,7 +6,7 @@
 //   2 = RX
 //   3 = HALF_DUPLEX (same firmware can RX and TX)
 #ifndef MESH_APP_ROLE 
-#define MESH_APP_ROLE 2
+#define MESH_APP_ROLE 3
 #endif
 
 // Half-duplex test button configuration.
