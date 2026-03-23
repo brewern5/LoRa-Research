@@ -3,6 +3,7 @@
 #include <SdFat.h>
 #include <SPI.h>
 #include <stdint.h>
+#include "../../mesh_role_config.h"
 
 // Heltex ESP32 LoRa V3 SDI pins
 #define SD_CS 34
@@ -39,6 +40,11 @@ class SdManager {
         uint32_t txTime;
         uint32_t ackTime;
         int32_t  rttMs;
+        const char* runId;
+        const char* role;
+        uint8_t  nodeId;
+        uint8_t  sf;
+        uint32_t ackTimeoutMs;
         float    lat;
         float    lon;
         int      rssi;

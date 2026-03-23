@@ -260,6 +260,11 @@ bool SdManager::logTransmission(float lat, float lon, uint32_t txTime,
     .txTime = txTime,
     .ackTime = ackTime,
     .rttMs  = static_cast<int32_t>(ackTime) - static_cast<int32_t>(txTime),
+    .runId = MESH_RUN_ID,
+    .role = MESH_LOG_ROLE,
+    .nodeId = static_cast<uint8_t>(MESH_NODE_ID),
+    .sf = static_cast<uint8_t>(MESH_LORA_SF),
+    .ackTimeoutMs = static_cast<uint32_t>(MESH_ACK_TIMEOUT_MS),
     .lat    = lat,
     .lon    = lon,
     .rssi   = rssi,
@@ -335,6 +340,11 @@ namespace {
     "ack_time_utc",
     "ack_time",
     "rtt_ms",
+    "run_id",
+    "role",
+    "node_id",
+    "sf",
+    "ack_timeout_ms",
     "lat",
     "lon",
     "rssi",
@@ -348,7 +358,7 @@ namespace {
   };
   constexpr size_t LOG_COLUMN_COUNT = sizeof(LOG_COLUMNS) / sizeof(LOG_COLUMNS[0]);
   constexpr const char* EXPECTED_LOG_HEADER =
-    "timestamp_utc,millis,tx_time_utc,tx_time,ack_time_utc,ack_time,rtt_ms,lat,lon,rssi,snr,session_id,seq_num,frag_index,frag_len,packet_type,status";
+    "timestamp_utc,millis,tx_time_utc,tx_time,ack_time_utc,ack_time,rtt_ms,run_id,role,node_id,sf,ack_timeout_ms,lat,lon,rssi,snr,session_id,seq_num,frag_index,frag_len,packet_type,status";
 }
 
 void SdManager::_initializeTimeBase() {
@@ -491,6 +501,11 @@ bool SdManager::_writeLogRow(File32& file, const LogRow& row) {
   mustWrite(file.print(ackIso)); mustWrite(file.print(','));
   mustWrite(file.print(row.ackTime)); mustWrite(file.print(','));
   mustWrite(file.print(row.rttMs)); mustWrite(file.print(','));
+  mustWrite(file.print(row.runId)); mustWrite(file.print(','));
+  mustWrite(file.print(row.role)); mustWrite(file.print(','));
+  mustWrite(file.print(row.nodeId)); mustWrite(file.print(','));
+  mustWrite(file.print(row.sf)); mustWrite(file.print(','));
+  mustWrite(file.print(row.ackTimeoutMs)); mustWrite(file.print(','));
   mustWrite(file.print(lat, 6)); mustWrite(file.print(','));
   mustWrite(file.print(lon, 6)); mustWrite(file.print(','));
   mustWrite(file.print(row.rssi)); mustWrite(file.print(','));

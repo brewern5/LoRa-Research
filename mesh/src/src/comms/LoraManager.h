@@ -2,6 +2,7 @@
 #include <RadioLib.h>
 #include "../storage/SdManager.h"
 #include "../models/packet.h"
+#include "../../mesh_role_config.h"
 
 // Heltec ESP32 LoRa V3 SX1262 pin mapping
 #define LORA_NSS 8
@@ -9,17 +10,38 @@
 #define LORA_NRST 12
 #define LORA_BUSY 13
 
-// LoRa RF parameters
-#define TX_FREQ_MHZ 915.0f
-#define TX_BW_KHZ 125.0f
-#define TX_SF 7
-#define TX_CR 5 // 4/5
-#define TX_POWER_DBM 14
+// LoRa RF parameters (defaults can be overridden in mesh_role_config.h)
+#ifndef MESH_LORA_FREQ_MHZ
+#define MESH_LORA_FREQ_MHZ 915.0f
+#endif
 
-// Session config
-#define MY_NODE_ID 0x01
-#define PEER_NODE_ID 0x02
-#define EXPERIMENT_ID 0x01
+#ifndef MESH_LORA_BW_KHZ
+#define MESH_LORA_BW_KHZ 125.0f
+#endif
+
+#ifndef MESH_LORA_SF
+#define MESH_LORA_SF 7
+#endif
+
+#ifndef MESH_LORA_CR
+#define MESH_LORA_CR 5
+#endif
+
+#ifndef MESH_LORA_TX_POWER_DBM
+#define MESH_LORA_TX_POWER_DBM 14
+#endif
+
+#ifndef MESH_NODE_ID
+#define MESH_NODE_ID 0x01
+#endif
+
+#ifndef MESH_PEER_NODE_ID
+#define MESH_PEER_NODE_ID 0x02
+#endif
+
+#ifndef MESH_EXPERIMENT_ID
+#define MESH_EXPERIMENT_ID 0x01
+#endif
 
 class LoRaManager {
     public:

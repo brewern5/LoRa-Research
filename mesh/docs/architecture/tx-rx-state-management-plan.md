@@ -131,6 +131,13 @@ Deliverable:
 - Capture success rate, retry rate, and median RTT.
 - Identify unstable regions and likely causes.
 
+Phase start status:
+- [x] Added compile-time sweep controls in `mesh_role_config.h` (`MESH_LORA_SF`, `MESH_ACK_TIMEOUT_MS`, `MESH_RUN_ID`).
+- [x] Added sweep metadata columns to CSV logs (`run_id`, `role`, `node_id`, `sf`, `ack_timeout_ms`).
+- [x] Added report script `mesh/src/tests/r2_sweep_report.py` to compute success/retry/median RTT per `(sf, ack_timeout_ms)`.
+- [ ] Execute the first sweep matrix (for example: SF 7 and 9 with timeout 1500 and 2500 ms).
+- [ ] Record campus environment notes for each run and compare unstable regions.
+
 Deliverable:
 - Initial SF and timeout matrix for campus testing decisions.
 

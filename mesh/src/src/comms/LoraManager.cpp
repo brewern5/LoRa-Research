@@ -3,12 +3,12 @@
 
 bool LoRaManager::init(uint16_t *g_session_id, uint16_t *g_seq_num) {
   int state = _radio.begin(
-    TX_FREQ_MHZ,
-    TX_BW_KHZ,
-    TX_SF,
-    TX_CR,
+    MESH_LORA_FREQ_MHZ,
+    MESH_LORA_BW_KHZ,
+    MESH_LORA_SF,
+    MESH_LORA_CR,
     RADIOLIB_SX126X_SYNC_WORD_PRIVATE,
-    TX_POWER_DBM
+    MESH_LORA_TX_POWER_DBM
   );
 
   _session_id = *g_session_id;
@@ -73,14 +73,14 @@ void LoRaManager::_fillHeader(LoRaAudioPacket* pkt, uint8_t type) {
   buildHeader(
     &pkt->header,
     type,
-    MY_NODE_ID,
-    PEER_NODE_ID,
-    EXPERIMENT_ID,
+    MESH_NODE_ID,
+    MESH_PEER_NODE_ID,
+    MESH_EXPERIMENT_ID,
     _session_id,
     _seq_num++,
-    TX_POWER_DBM,
-    TX_SF,
-    TX_CR
+    MESH_LORA_TX_POWER_DBM,
+    MESH_LORA_SF,
+    MESH_LORA_CR
   );
 }
 
@@ -199,7 +199,7 @@ bool LoRaManager::waitForAck(uint16_t expected_seq, uint32_t timeout_ms) {
   resetSPI();
   
   uint8_t buf[LORA_MAX_PAYLOAD];
-  int state = _radio.receive(buf, sizeof(buf));
+  int state = _radio.receive(buf, sizeof(buf), timeout_ms);
 
   if (state != RADIOLIB_ERR_NONE) {
     Serial.printf("[RX] No ACK received (code %d)\n", state);
@@ -245,7 +245,8 @@ bool LoRaManager::receiveRaw(uint8_t* out, size_t out_size, size_t* received_len
   }
 
   resetSPI();
-  int state = _radio.receive(out, out_size);
+  // Keep RX polling responsive to avoid stalling the main loop.
+  int state = _radio.receive(out, out_size, 20);
   if (state != RADIOLIB_ERR_NONE) {
     return false;
   }
@@ -270,9 +271,9 @@ bool LoRaManager::sendAckFor(const LoRaHeader& receivedHeader, uint8_t status) {
     receivedHeader.exp_id,
     receivedHeader.session_id,
     receivedHeader.seq_num,
-    TX_POWER_DBM,
-    TX_SF,
-    TX_CR
+    MESH_LORA_TX_POWER_DBM,
+    MESH_LORA_SF,
+    MESH_LORA_CR
   );
 
   AckPayload& ack = pkt.payload.ack;

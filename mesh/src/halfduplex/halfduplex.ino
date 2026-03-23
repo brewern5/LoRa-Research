@@ -14,7 +14,7 @@ ResearchStateMachine state("HD");
 
 uint16_t g_session_id;
 uint16_t g_seq_num;
-uint32_t timeout_ms = 2000;
+uint32_t timeout_ms = static_cast<uint32_t>(MESH_ACK_TIMEOUT_MS);
 
 // Placeholder location until GPS integration is added
 constexpr float kDefaultLat = 0.0f;
@@ -26,6 +26,8 @@ constexpr uint16_t kPayloadSampleHz = 8000;
 constexpr uint16_t kPayloadDurationMs = 0;
 constexpr uint8_t kMaxAckRetries = 2;
 constexpr uint32_t kButtonDebounceMs = 35;
+constexpr uint32_t kIdleDisplayTickMs = 500;
+constexpr uint32_t kIdleSerialTickMs = 2000;
 
 #if MESH_TX_BUTTON_ACTIVE_LOW
 constexpr uint8_t kButtonPressedLevel = LOW;
@@ -36,6 +38,9 @@ constexpr uint8_t kButtonPressedLevel = HIGH;
 static uint8_t g_lastButtonSample = HIGH;
 static uint8_t g_stableButtonState = HIGH;
 static uint32_t g_lastButtonChangeMs = 0;
+static uint32_t g_lastIdleDisplayMs = 0;
+static uint32_t g_lastIdleSerialMs = 0;
+static uint8_t g_idleSpinner = 0;
 
 static void withRetrySuffix(char* out, size_t outLen, const char* baseStatus, uint8_t retryIndex)
 {
@@ -132,6 +137,32 @@ static bool wasTxButtonPressed()
     }
 
     return false;
+}
+
+static void publishIdleHeartbeat()
+{
+    const uint32_t now = millis();
+
+    if ((now - g_lastIdleDisplayMs) >= kIdleDisplayTickMs)
+    {
+        static const char* kIdleFrames[] = {
+            "Idle",
+            "Idle .",
+            "Idle ..",
+            "Idle ..."
+        };
+
+        StatusDisplay::setLoRa(StatusDisplay::LORA_OK_IDLE);
+        StatusDisplay::setMessage(kIdleFrames[g_idleSpinner]);
+        g_idleSpinner = static_cast<uint8_t>((g_idleSpinner + 1U) % 4U);
+        g_lastIdleDisplayMs = now;
+    }
+
+    if ((now - g_lastIdleSerialMs) >= kIdleSerialTickMs)
+    {
+        Serial.printf("[HD][IDLE] alive uptime=%lu ms\n", static_cast<unsigned long>(now));
+        g_lastIdleSerialMs = now;
+    }
 }
 
 static void processIncomingPacket()
@@ -496,8 +527,20 @@ void setup()
 
     Serial.printf("Session: 0x%04X\n", g_session_id);
     Serial.printf("Button pin=%d active=%s\n", MESH_TX_BUTTON_PIN, MESH_TX_BUTTON_ACTIVE_LOW ? "LOW" : "HIGH");
+    Serial.printf("Run config: run_id=%s role=%s sf=%u bw=%.1f cr=4/%u timeout_ms=%lu tx_power=%d\n",
+                  MESH_RUN_ID,
+                  MESH_LOG_ROLE,
+                  static_cast<unsigned>(MESH_LORA_SF),
+                  static_cast<double>(MESH_LORA_BW_KHZ),
+                  static_cast<unsigned>(MESH_LORA_CR),
+                  static_cast<unsigned long>(timeout_ms),
+                  static_cast<int>(MESH_LORA_TX_POWER_DBM));
     Serial.println("Node ready: idle RX, press button to TX payload\n");
     StatusDisplay::setMessage("Press button to TX");
+
+    const uint32_t now = millis();
+    g_lastIdleDisplayMs = now;
+    g_lastIdleSerialMs = now;
 }
 
 void loop()
@@ -510,6 +553,14 @@ void loop()
         StatusDisplay::setMessage("Button pressed");
         transmitPayloadFile();
         StatusDisplay::setMessage("Press button to TX");
+
+        const uint32_t now = millis();
+        g_lastIdleDisplayMs = now;
+        g_lastIdleSerialMs = now;
+    }
+    else
+    {
+        publishIdleHeartbeat();
     }
 
     delay(10);
