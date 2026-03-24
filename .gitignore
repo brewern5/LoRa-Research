@@ -8,3 +8,7 @@ peer_eval/CSC/*
 # Local env files for per-sketch VS Code configs
 p2p/LoRa-32-V3/tx/.env
 p2p/LoRa-32-V3/rx/.env
+
+# Local Arduino profile overrides
+**/sketch.local.yaml
+**/sketch.*.local.yaml
