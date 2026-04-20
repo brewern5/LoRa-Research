@@ -23,22 +23,32 @@ paginate: true
 ## Proposed Solution
 
 - Understand the **limitations** of **LoRa** in **multiple** different **network settings**.
-- Create a **highly distributed** system of **LoRa transmitters** and **Receivers**
+- Create a extendable P2P network to transfer files effectively 
 
 ---
 
 # Architecture
 
-## System Overview
+## System Overview pt. 1
 
-**Key Components:**
+**Physical Components:**
 - **ESP32 Micro Controller**: **Brains** and main component running software 
+- **SD Card Reader** - for storage of transmission objects and logging
+- **GPS/GNSS** - Accurate logging position
 - **LoRa Tx/Rx**: Transmission and reception devices
+
+---
+## System Overview pt. 2
+**Tech Stack:**
+- **VsCode Arduino Maker Workshop**: Organize, compile and upload software
+- **Copilot - ChatGPT - Claude** - Questions, MVP
+- **C++** - Code design
+- **Github** - VCS
 
 ---
 
 
-# Sprint Structure - Sprint 1
+# Sprint 1
 
 ## Goals
 - Simple **LoRa P2P network**
@@ -52,27 +62,69 @@ paginate: true
 
 ---
 
-# Sprint Structure - Sprint 2
+# Sprint 2
 
 ## Goals
-- LoRa **Mesh network** creation
-- **Parelleization** of **Transmission and reception**
+- Update to state machine for further testing
+- Add GPS/GNSS
+- Finish Paper
 
 ## Tasks
-1. Create a more **complex network** of **LoRa devices**
-2. Understand **LoRa mesh limitations**. 
-3. **Spreading Factor** and **Bandwidth evaluation** (For Mesh)
-4. **Distribute** **transmission** and **reception** to begin parallelization of Tx and Rx
+1. Create a better more extenadable implementation of the device for further testing
+2. Add GPS/GNSS for 
+3. Write and submit paper with results
     
+
+---
+
+# Images - 
+
+![Breadboard](../../imgs/breadboard_setup.jpg)
+
+---
+
+# Images 2 - 
+
+![Serial](../../imgs/serial_monitor_log.png)
+
 
 ---
 
 # Learning with AI
 
-## AI Integration
+## AI Integration 1
 
-1. **Serialization** and **Parallelization** in **wired connections**.
-2. Learning C/C++ with AI for **effective** programming of micro-controllers 
+1. C++ is a highly optimizable language perfect for embedded system's programming. It can be useful but also tricky(especially to native Java users) with it's pointers, Structs, STD lib, and memory management just to name a few.
+
+---
+
+## AI Integration 2
+
+2. There a couple over-arching methods of digital communication. Serial and Parallel. Serial is the most common is this day and age due to the speed of cable comms. It has a bunch of protocols that fall under it such as SPI, I2C, UART, and USB to name a few. Wireless is predominantly in serial but is more defined at the transport layer with things lke Bluetooth, WiFi, LoRa, 433 Mhz to name a few.  
+
+---
+
+## How I used AI for coding
+
+- Think about AGILE structure and being a mnager. AI is my subordinate
+  - Create features and requirements and self document all. Send to AI, confirm all progress makes sense
+  - Rinse and repeat
+  - When in a good place, have AI create an integration plan and review, rinse and repeat **WITH SELF REVIEW** 
+  - Then have AI follow the plan and test along the way
+
+---
+
+# Paper
+
+[link](https://github.com/brewern5/LoRa-Research/blob/main/docs/paper/paper.pdf)
+---
+
+
+# Future 
+
+- Bit off more than I can chew with mesh network implementation
+  - I have the  framework and extension ready to continue but other work got in the way
+- Continue testing and write another paper using mesh and 
 
 ---
 
