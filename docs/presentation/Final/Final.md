@@ -38,6 +38,7 @@ paginate: true
 - **LoRa Tx/Rx**: Transmission and reception devices
 
 ---
+
 ## System Overview pt. 2
 **Tech Stack:**
 - **VsCode Arduino Maker Workshop**: Organize, compile and upload software
@@ -46,7 +47,6 @@ paginate: true
 - **Github** - VCS
 
 ---
-
 
 # Sprint 1
 
@@ -94,11 +94,15 @@ paginate: true
 
 ## AI Integration 1
 
+### C++ management
+
 1. C++ is a highly optimizable language perfect for embedded system's programming. It can be useful but also tricky(especially to native Java users) with it's pointers, Structs, STD lib, and memory management just to name a few.
 
 ---
 
 ## AI Integration 2
+
+### Digital Communication
 
 2. There a couple over-arching methods of digital communication. Serial and Parallel. Serial is the most common is this day and age due to the speed of cable comms. It has a bunch of protocols that fall under it such as SPI, I2C, UART, and USB to name a few. Wireless is predominantly in serial but is more defined at the transport layer with things lke Bluetooth, WiFi, LoRa, 433 Mhz to name a few.  
 
@@ -117,6 +121,7 @@ paginate: true
 # Paper
 
 [link](https://github.com/brewern5/LoRa-Research/blob/main/docs/paper/paper.pdf)
+
 ---
 
 
