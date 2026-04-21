@@ -20,6 +20,8 @@ testing, routing behavior, and latency/reliability analysis.
 
 ### P2P (Tested Baseline)
 
+[Video Demo](https://www.youtube.com/shorts/5_YekBIIFng)
+
 The current tested baseline is point-to-point transmission using
 `p2p/LoRa-32-V3` (TX) and `p2p/LoRa-32-V2` (RX), including protocol and
 reliability testing in each module's `tests/` folder.
