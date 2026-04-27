@@ -33,7 +33,8 @@ power constraints that **prevent conventional systems** from supporting **human-
 - How to **define a real-world problem**
 - I learned a lot about the **limitations of LoRa** and it's capabilities
 - **Digital communications**
-- How to write a paper, more about the research process
+- **C++ programming** 
+- How to **write a paper**, more about the research "game"
 - How to present my work in an easy to understand way
 
 ---
@@ -54,6 +55,8 @@ power constraints that **prevent conventional systems** from supporting **human-
 - How to use AI to organize my thoughts, questions, and codebases
   - Use project structure inside Gen-AI agents
 - That I can effectively solve a complex problem 
+- C based programming is 
+  - The control is 
 
 ---
 
@@ -122,7 +125,7 @@ power constraints that **prevent conventional systems** from supporting **human-
 
 - Bit off more than I can chew with mesh network implementation
   - I have the  framework and extension ready to continue but other work got in the way
-- Continue testing and write another paper using mesh and 
+- Continue testing and write another paper using mesh 
 
 ---
 
