@@ -14,37 +14,66 @@ paginate: true
 
 # Problem Domain
 
-- LoRa(Long Range) has a low bandwidth capacity, which allows for long range, but small payloads. Cannot send large files effectively. 
+- **Infrastructure-less environments**, such as **disaster
+zones** and **remote communities**, impose severe bandwidth and
+power constraints that **prevent conventional systems** from supporting **human-scale voice communication**.
 
 ---
 
 # Proposed Solution
 
-## Proposed Solution
-
-- Understand the **limitations** of **LoRa** in **multiple** different **network settings**.
-- Create a extendable P2P network to transfer files effectively 
-
----
-
-# Architecture
-
-## System Overview pt. 1
-
-**Physical Components:**
-- **ESP32 Micro Controller**: **Brains** and main component running software 
-- **SD Card Reader** - for storage of transmission objects and logging
-- **GPS/GNSS** - Accurate logging position
-- **LoRa Tx/Rx**: Transmission and reception devices
+- Create a **low-power**, **extendable**, **long range network** utilizing **LoRa**
+  - *LoRa(Long Range Radio) has a low bandwidth capacity, which allows for long range, but small payloads. Cannot send large files effectively.*
+- **Integrate an AI model** for **semantic compression** to **bypass LoRa's limitation** in payload capacity
 
 ---
 
-## System Overview pt. 2
-**Tech Stack:**
-- **VsCode Arduino Maker Workshop**: Organize, compile and upload software
-- **Copilot - ChatGPT - Claude** - Questions, MVP
-- **C++** - Code design
-- **Github** - VCS
+# What I Learned
+
+- How to **define a real-world problem**
+- I learned a lot about the **limitations of LoRa** and it's capabilities
+- **Digital communications**
+- How to write a paper, more about the research process
+- How to present my work in an easy to understand way
+
+---
+
+# What issues I Faced
+
+- **Physical hardware complexity**
+  - Had some IoT experience but no where near this complex
+- **Managing** a device with **multiple different modes of communication** and how to **effectively manipulate data** between different components
+- **Managing** all the **different parts of the project** - between the paper, the testing and the implementation
+
+---
+
+# What I discovered
+
+- How I can work with AI to help effectively solve my problems
+  - Utilize AI to back and forth plan implementation 
+- How to use AI to organize my thoughts, questions, and codebases
+  - Use project structure inside Gen-AI agents
+- That I can effectively solve a complex problem 
+
+---
+
+## How I used AI for coding
+
+- Think about AGILE structure and being a mnager. AI is my subordinate
+  - Create features and requirements and self document all. Send to AI, confirm all progress makes sense
+  - Rinse and repeat
+  - When in a good place, have AI create an integration plan and review, rinse and repeat **WITH SELF REVIEW** 
+  - Then have AI follow the plan and test along the way
+
+--- 
+
+## How I used AI for writing
+
+- I created a project inside my GenAI agent (Claude)
+  - Pasted the current paper within the context alongside a more layman description
+  - Would copy and paste sections of the paper, asking for a review and potential edit points
+    - **ALWAYS REVIEW THE AI'S WORK**
+  - Rinse and repeat
 
 ---
 
@@ -57,73 +86,37 @@ paginate: true
 ## Tasks
 1. Understand how to make a **simple LoRa network** with **complete payload reception** and **transmission**
 2. Push it to it's limits - **understand** the **limitations** of the devices (Bandwidth, range)
-3. Create **evaluation matrix** for **combinations** of **Spreading factor and bandwidth**. 
-
+3. Create a **packet structure** and **fragmentation protocol**
+4. **Implement SD card reader** for logging and **storing intended transmissio**n file
 
 ---
 
 # Sprint 2
-
 ## Goals
-- Update to state machine for further testing
-- Add GPS/GNSS
 - Finish Paper
-
+- Add GPS/GNSS Device 
+- Update to state machine for further testing
 ## Tasks
-1. Create a better more extenadable implementation of the device for further testing
-2. Add GPS/GNSS for 
-3. Write and submit paper with results
-    
+1. Make the device work as a **state management machine** rather than a single-responsibiity, making it more extendable
+2. **Bug fixing** and **finalize logging**
+3. Added **GPS module** for accurate positioning for testing
+4. **Write and submit paper** with results
+5. **Poster** Presentation
 
----
-
-# Images - 
-
-![Breadboard](../../imgs/breadboard_setup.jpg)
-
----
-
-# Images 2 - 
-
-![Serial](../../imgs/serial_monitor_log.png)
-
-
----
-
-# Learning with AI
-
-## AI Integration 1
-
-### C++ management
-
-1. C++ is a highly optimizable language perfect for embedded system's programming. It can be useful but also tricky(especially to native Java users) with it's pointers, Structs, STD lib, and memory management just to name a few.
-
----
-
-## AI Integration 2
-
-### Digital Communication
-
-2. There a couple over-arching methods of digital communication. Serial and Parallel. Serial is the most common is this day and age due to the speed of cable comms. It has a bunch of protocols that fall under it such as SPI, I2C, UART, and USB to name a few. Wireless is predominantly in serial but is more defined at the transport layer with things lke Bluetooth, WiFi, LoRa, 433 Mhz to name a few.  
-
----
-
-## How I used AI for coding
-
-- Think about AGILE structure and being a mnager. AI is my subordinate
-  - Create features and requirements and self document all. Send to AI, confirm all progress makes sense
-  - Rinse and repeat
-  - When in a good place, have AI create an integration plan and review, rinse and repeat **WITH SELF REVIEW** 
-  - Then have AI follow the plan and test along the way
 
 ---
 
 # Paper
 
-[link](https://github.com/brewern5/LoRa-Research/blob/main/docs/paper/paper.pdf)
+- https://github.com/brewern5/LoRa-Research/blob/main/docs/paper/paper.pdf
 
 ---
 
+# Demo 
+
+- https://www.youtube.com/shorts/5_YekBIIFng 
+
+---
 
 # Future 
 
