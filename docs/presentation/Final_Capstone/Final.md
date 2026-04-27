@@ -121,6 +121,14 @@ power constraints that **prevent conventional systems** from supporting **human-
 
 ---
 
+# Links
+
+https://github.com/brewern5/LoRa-Research - Github
+https://github.com/brewern5/LoRa-Research/tree/main/docs/presentation/LeaningWIthAI - Learning With AI
+https://nku.instructure.com/courses/87393/pages/individual-project-nate-brewer-2 - Canvas Page
+
+---
+
 # Future 
 
 - Bit off more than I can chew with mesh network implementation
