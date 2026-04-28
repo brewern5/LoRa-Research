@@ -13,6 +13,7 @@ The system must continue operating when GNSS hardware is absent. GNSS state must
 - [ ] Create a dedicated GNSS module header at src/app/sensors/GnssManager.h.
 - [ ] Create a dedicated GNSS module source at src/app/sensors/GnssManager.cpp.
 - [ ] Implement UART init for SAM-M8Q with TX=42 and RX=41.
+- [ ] Add GNSS configuration option to switch device dynamics between stationary and moving modes.
 - [ ] Implement a non-blocking GNSS init flow.
 - [ ] Implement a GNSS update loop method to parse incoming NMEA data.
 - [ ] Expose GNSS presence state (connected or not connected).
