@@ -3,7 +3,7 @@
 ## P2P LoRa network
   - Learn LoRa lib for esp32
   - Setup 2 half-duplex esp32 devices
-  - Develop in an extendable OOP/SOLID centric way
+  - seperate tx and rx machines 
 ## SD Card reader integration
   - Physically connect hardware
   - create a logging protocol
@@ -20,4 +20,10 @@
   - Plan state machine design for true half-duplex functionality
   - Create rules for transitions between Tx and Rx states
   - Create extendable state machine for furture development
-
+## Writing Paper
+  - Combine semantic model and LoRa P2P testing
+  - Prepare and present results in paper
+## Celebration Presentation
+  - Create poster with more prelimenary results
+  - SF7-12 testing
+  - Present work   
